@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+		http://www.springframework.org/schema/data/mongo
+		http://www.springframework.org/schema/data/mongo/spring-mongo.xsd
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+
+	<!-- 配置自动扫描的包 -->
+	<context:component-scan base-package="cn.csu.disnet">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+	
+	<!-- 开启注解 -->
+	<context:annotation-config />
+	
+
+	<!-- 配置数据源 -->
+	<!-- 导入资源文件 -->
+	<!-- <context:property-placeholder location="classpath:db.properties,classpath:mail.properties" system-properties-mode="NEVER" /> -->
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+    	<property name="locations">  
+    	<list>
+          	<value>classpath:mongodb.properties</value>
+          	<value>classpath:mail.properties</value>  
+        </list>  
+    	</property>  
+	</bean>
+	
+	<!-- 配置邮件发送设置 -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host">
+			<value>${mail.host}</value>
+		</property>
+		<property name="port">
+			<value>${mail.port}</value>
+		</property>
+		<!-- 发送者邮箱名称 -->
+		<property name="username">
+			<value>${mail.username}</value>
+		</property>
+		<!-- 发送者邮箱客户端授权密码，开通SMTP服务得到 -->
+		<property name="password">
+			<value>${mail.password}</value>
+		</property>
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.transport.protocal">${mail.transport.protocal}</prop>
+				<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="mailMessage" class="org.springframework.mail.SimpleMailMessage">  
+        <property name="from">  
+            <value>${mail.from}</value>  
+        </property>  
+        <property name="subject">
+        	<value>${mail.subject}</value>
+        </property>
+        <!-- 查看SimpleMailMessage源码还可以注入标题,内容等 -->
+    </bean> 
+
+	<!--3.服务器连接信息-->
+    <mongo:mongo-client host="${mongo.host}" port="${mongo.port}"></mongo:mongo-client>
+    
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg ref="mongo"/>
+        <!-- 设置使用的数据库 名-->
+        <constructor-arg name="databaseName" value="${mongo.dbname}"/>
+    </bean>
+
+</beans>
